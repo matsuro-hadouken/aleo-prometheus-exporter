@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Credits @pawadski
+# https://github.com/pawadski/monitoring_exporter
+
 # small http wrapper for bash scripts via xinetd
 
 ulimit -n 20480
