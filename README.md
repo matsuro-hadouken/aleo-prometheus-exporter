@@ -1,5 +1,7 @@
 # aleo-prometheus-exporter
 
+Based on amazing idea and research from @pawadski https://github.com/pawadski/monitoring_exporter
+
 This setup assume everything is set on the same machine, Prometheus, Exporter, SnarkOS miner.
 node should be running already and RPC replay accordingly, installation script check "all" conditions _( well, not really yet )_.
 Exporter is "very alpha" at the moment and purely made for beginning of protocol pentest and general entertainment.
