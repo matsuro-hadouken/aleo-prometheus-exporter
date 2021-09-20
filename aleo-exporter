@@ -10,7 +10,9 @@ END_POINT="http:/127.0.0.1:3030/"
 function get_Data() {
 
     getnodestats=$(curl -s --data-binary '{"jsonrpc": "2.0", "id":"documentation", "method": "getnodestats" }' -H 'content-type: application/json' "$END_POINT" | jq .result)
-    getnodeinfo=$(curl -s --data-binary '{"jsonrpc": "2.0", "id":"documentation", "method": "getnodeinfo" }' -H 'content-type: application/json' "$END_POINT" | jq '.result | .is_bootnode,.is_miner,.is_syncing' )
+    getnodeinfo=$(curl -s --data-binary '{"jsonrpc": "2.0", "id":"documentation", "method": "getnodeinfo" }' -H 'content-type: application/json' "$END_POINT" | jq '.result | .is_miner,.is_syncing' )
+    peers_connected=$(curl -s --data-binary '{"jsonrpc": "2.0", "id":"documentation", "method": "getconnectioncount" }' -H 'content-type: application/json' "$END_POINT" | jq -r .result)
+
 }
 
 function metrics_collector() {
@@ -92,15 +94,8 @@ function metrics_collector() {
     # nodeinfo
     IFS=' ' read -r -a nodeinfo_arr <<<$(echo $getnodeinfo)
 
-    is_bootnode="${nodeinfo_arr[0]}"
-    is_miner="${nodeinfo_arr[1]}"
-    is_syncing="${nodeinfo_arr[2]}"
-
-    if [[ $is_bootnode =~ "false" ]]; then
-        aleo_nodeinfo_is_bootnode=0
-    else
-        aleo_nodeinfo_is_bootnode=1
-    fi
+    is_miner="${nodeinfo_arr[0]}"
+    is_syncing="${nodeinfo_arr[1]}"
 
     if [[ $is_miner =~ "false" ]]; then
         aleo_nodeinfo_is_miner=0
@@ -119,6 +114,9 @@ function metrics_collector() {
 function prometheus_constructor() {
 
     cat <<EOF >./aleo.metrics
+# HELP aleo_node_currently_connected_peers
+# TYPE aleo_node_currently_connected_peers gauge
+aleo_node_currently_connected_peers $peers_connected
 # HELP aleo_connections_all_accepted
 # TYPE aleo_connections_all_accepted gauge
 aleo_connections_all_accepted $aleo_connections_all_accepted
@@ -248,9 +246,6 @@ aleo_queues_storage $aleo_queues_storage
 # HELP aleo_queues_sync_items
 # TYPE aleo_queues_sync_items gauge
 aleo_queues_sync_items $aleo_queues_sync_items
-# HELP aleo_nodeinfo_is_bootnode
-# TYPE aleo_nodeinfo_is_bootnode gauge
-aleo_nodeinfo_is_bootnode $aleo_nodeinfo_is_bootnode
 # HELP aleo_nodeinfo_is_miner
 # TYPE aleo_nodeinfo_is_miner gauge
 aleo_nodeinfo_is_miner $aleo_nodeinfo_is_miner
