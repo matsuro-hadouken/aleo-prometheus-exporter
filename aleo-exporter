@@ -7,6 +7,8 @@ export PATH="/usr/local/bin:$PATH"
 
 END_POINT="http:/127.0.0.1:3030/"
 
+re='^[0-9]+$'
+
 function get_Data() {
 
     getnodestats=$(curl -s --data-binary '{"jsonrpc": "2.0", "id":"documentation", "method": "getnodestats" }' -H 'content-type: application/json' "$END_POINT" | jq .result)
@@ -61,7 +63,14 @@ function metrics_collector() {
     IFS=' ' read -r -a internal_rtt_arr <<<$(echo $(echo "$getnodestats" |  jq '.internal_rtt | .getblocks,.getmemorypool,.getpeers,.getsync'))
 
     aleo_internal_rtt_getblocks="${internal_rtt_arr[0]}"
-    aleo_internal_rtt_getmemorypool="${internal_rtt_arr[1]}"
+
+        # fix bug in json field
+        if ! [[ "${internal_rtt_arr[1]}" =~ $re ]] ; then
+            aleo_internal_rtt_getmemorypool=0
+        else
+            aleo_internal_rtt_getmemorypool="${internal_rtt_arr[1]}"
+        fi
+
     aleo_internal_rtt_getpeers="${internal_rtt_arr[2]}"
     aleo_internal_rtt_getsync="${internal_rtt_arr[3]}"
 
@@ -113,7 +122,7 @@ function metrics_collector() {
 
 function prometheus_constructor() {
 
-    cat <<EOF >./aleo.metrics
+    cat <<EOF >/opt/metrics.d/aleo.metrics
 # HELP aleo_node_currently_connected_peers
 # TYPE aleo_node_currently_connected_peers gauge
 aleo_node_currently_connected_peers $peers_connected
