@@ -1,3 +1,7 @@
+# METRICS ENDPOINT REMOVED BY DEVELOPERS :-(
+# THIS WILL NOT WORK ANYMORE !!!
+# [ DEPRECATED ]
+
 # aleo-prometheus-exporter
 
 Based on amazing idea and research from @pawadski https://github.com/pawadski/monitoring_exporter
